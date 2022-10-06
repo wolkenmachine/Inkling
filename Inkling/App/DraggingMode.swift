@@ -12,6 +12,8 @@ class DraggingMode {
   var handles: [BezierNode]
   var draggingCluster: NodeCluster? = nil
   var draggingHandle: BezierNode? = nil
+
+  var delegate: DraggingModeDelegate?
   
   init(_ clusters: NodeClusters, _ handles: [BezierNode]) {
     self.clusters = clusters
@@ -49,7 +51,10 @@ class DraggingMode {
     if let draggingCluster = draggingCluster {
       // Pencil moved
       for event in touches.moved(.Pencil) {
-        draggingCluster.move(event.pos)
+        let performDefault = delegate?.clusterDragged(draggingCluster, toPos: event.pos) ?? true
+        if performDefault {
+          draggingCluster.move(event.pos)
+        }
         touches.capture(event)
       }
     }
@@ -73,4 +78,10 @@ class DraggingMode {
       }
     }
   }
+}
+
+protocol DraggingModeDelegate {
+  // The user dragged a NodeCluster. If `false` is returned, the delegate
+  // does not want to handle the event.
+  func clusterDragged(_ cluster: NodeCluster, toPos pos: CGVector) -> Bool
 }

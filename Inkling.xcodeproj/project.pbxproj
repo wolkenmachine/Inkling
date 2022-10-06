@@ -63,6 +63,9 @@
 		1FF9565E28BE58B6000FAD4B /* TriangulatePolygon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9565D28BE58B6000FAD4B /* TriangulatePolygon.swift */; };
 		1FF9566028BE5B09000FAD4B /* CanvasFill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9565F28BE5B09000FAD4B /* CanvasFill.swift */; };
 		1FF9566228BE62CD000FAD4B /* CanvasElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9566128BE62CD000FAD4B /* CanvasElement.swift */; };
+		B43A5C0F28ED918A0046CF32 /* ScriptingAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B43A5C0E28ED918A0046CF32 /* ScriptingAPI.swift */; };
+		B43A5C1128ED92170046CF32 /* JavaScriptCoreExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B43A5C1028ED92170046CF32 /* JavaScriptCoreExtensions.swift */; };
+		B4E5464E28D8966D00310C27 /* ScriptLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E5464D28D8966D00310C27 /* ScriptLoader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -125,6 +128,9 @@
 		1FF9565D28BE58B6000FAD4B /* TriangulatePolygon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriangulatePolygon.swift; sourceTree = "<group>"; };
 		1FF9565F28BE5B09000FAD4B /* CanvasFill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasFill.swift; sourceTree = "<group>"; };
 		1FF9566128BE62CD000FAD4B /* CanvasElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasElement.swift; sourceTree = "<group>"; };
+		B43A5C0E28ED918A0046CF32 /* ScriptingAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptingAPI.swift; sourceTree = "<group>"; };
+		B43A5C1028ED92170046CF32 /* JavaScriptCoreExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JavaScriptCoreExtensions.swift; sourceTree = "<group>"; };
+		B4E5464D28D8966D00310C27 /* ScriptLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptLoader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -184,6 +190,7 @@
 				1FB0A4FD28AE795F00D29342 /* Products */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 0;
 		};
 		1FB0A4FD28AE795F00D29342 /* Products */ = {
 			isa = PBXGroup;
@@ -244,6 +251,7 @@
 		1FB0A51F28AE7F7A00D29342 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				B43A5C0D28ED915F0046CF32 /* Scripting */,
 				1F15D00228B643FE00DAFB6E /* Canvas */,
 				1FB0A52028AE7F9B00D29342 /* App.swift */,
 				1FB0A52B28AE994C00D29342 /* ColorPicker.swift */,
@@ -257,6 +265,16 @@
 				1F9F920628C62C1000298AE2 /* DynamicGuide.swift */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		B43A5C0D28ED915F0046CF32 /* Scripting */ = {
+			isa = PBXGroup;
+			children = (
+				B4E5464D28D8966D00310C27 /* ScriptLoader.swift */,
+				B43A5C0E28ED918A0046CF32 /* ScriptingAPI.swift */,
+				B43A5C1028ED92170046CF32 /* JavaScriptCoreExtensions.swift */,
+			);
+			path = Scripting;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -375,8 +393,11 @@
 				1FB0A50028AE795F00D29342 /* AppDelegate.swift in Sources */,
 				1F9F920928C6488F00298AE2 /* FitCurveChaikin.swift in Sources */,
 				1FB0A51A28AE7ECD00D29342 /* Renderer.swift in Sources */,
+				B43A5C0F28ED918A0046CF32 /* ScriptingAPI.swift in Sources */,
 				1F15D00C28B6560700DAFB6E /* FitCurve.swift in Sources */,
 				1F15D00A28B6475400DAFB6E /* AnalyseStroke.swift in Sources */,
+				B4E5464E28D8966D00310C27 /* ScriptLoader.swift in Sources */,
+				B43A5C1128ED92170046CF32 /* JavaScriptCoreExtensions.swift in Sources */,
 				1FB0A51C28AE7F0600D29342 /* Shader.metal in Sources */,
 				1FB0A52428AE84C000D29342 /* StateBroadcast.swift in Sources */,
 				1FF9566228BE62CD000FAD4B /* CanvasElement.swift in Sources */,

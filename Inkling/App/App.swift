@@ -26,7 +26,9 @@ class App {
   
   //var strokes: [Stroke]
   var images: [RenderImage] = []
-  
+
+  let scriptLoader: ScriptLoader
+  let scriptingAPI: ScriptingAPI
   
   init(_ viewRef: ViewController) {
     self.viewRef = viewRef
@@ -38,6 +40,10 @@ class App {
     selectionCapture = SelectionCaputure()
     
     pseudoMode = PseudoModeInput()
+
+    scriptingAPI = ScriptingAPI(canvas)
+    scriptLoader = ScriptLoader(scriptingAPI)
+    scriptLoader.loadAllScripts()
   }
   
   func update(touches: Touches){
@@ -103,6 +109,7 @@ class App {
     if pseudoMode.mode == .Drag {
       if draggingMode == nil {
         draggingMode = DraggingMode(canvas.clusters, canvas.handles)
+        draggingMode!.delegate = scriptingAPI.observerBridge
       }
     } else {
       if draggingMode != nil {
@@ -130,8 +137,6 @@ class App {
         canvas.addStroke(stroke)
       }
     }
-    
-    
   }
   
   func render(renderer: Renderer) {

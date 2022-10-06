@@ -17,6 +17,8 @@ class Canvas {
   var handles: [BezierNode] = []
   var selection: CanvasSelection? = nil
   var depthCount: Float = 0
+
+  var observers: [CanvasObserver] = []
   
   func addStroke(_ stroke: Stroke) {
     let line_segments = analyseStroke(stroke)
@@ -45,10 +47,17 @@ class Canvas {
     if let element = element as? CanvasBezier {
       handles.append(contentsOf: element.handles)
     }
+    notifyObservers(elementAdded: element)
   }
   
   func removeElement(_ element: CanvasElement){
+    let originalCount = elements.count
     elements.removeAll(where: { e in e === element })
+
+    // Only notify observers if the element was actually in the array.
+    if (elements.count != originalCount) {
+      notifyObservers(elementRemoved: element)
+    }
     //clusters.removeAllForMorphable()
   }
   
@@ -83,7 +92,7 @@ class Canvas {
          if let stroke = stroke {
            if let split_strokes = stroke.erase(event.pos) {
              clusters.removeNodesWithElement(element)
-             elements.removeAll(where: {e in e === element })
+             removeElement(element)
              for s in split_strokes {
                addStroke(s)
              }
@@ -98,12 +107,10 @@ class Canvas {
       for cluster in selection.selectedClusters {
         for node in cluster.nodes {
           clusters.removeNode(node)
-          elements.removeAll(where: {e in e === node.element})
+          removeElement(node.element)
           handles.removeAll(where: {h in h.element === node.element})
         }
       }
-      
-      
     }
   }
   
@@ -128,4 +135,29 @@ class Canvas {
       selection.render(renderer)
     }
   }
+
+  func registerObserver(_ observer: CanvasObserver) {
+    observers.append(observer)
+  }
+
+  func unregisterObserver(_ observer: CanvasObserver) {
+    observers.removeAll(where:{ o in o === observer })
+  }
+
+  func notifyObservers(elementAdded element: CanvasElement) {
+    observers.forEach({ observer in
+      observer.elementAdded(element, toCanvas: self)
+    })
+  }
+
+  func notifyObservers(elementRemoved element: CanvasElement) {
+    observers.forEach({ observer in
+      observer.elementRemoved(element, fromCanvas: self)
+    })
+  }
+}
+
+protocol CanvasObserver: AnyObject {
+  func elementAdded(_ element: CanvasElement, toCanvas canvas: Canvas)
+  func elementRemoved(_ element: CanvasElement, fromCanvas canvas: Canvas)
 }
