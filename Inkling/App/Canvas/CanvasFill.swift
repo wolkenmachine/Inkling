@@ -12,6 +12,7 @@ class CanvasFill: CanvasElement {
   var nodes: [Node]
   var renderShape: RenderShape
   var color: Color
+  var depth: Float = 0
   
   init(_ points: [CGVector], color: Color){
     self.nodes = []
@@ -21,11 +22,11 @@ class CanvasFill: CanvasElement {
     self.nodes = points.map({p in
       Node(p, self)
     })
-    self.renderShape = polyFillShape(points: nodes.map({ n in n.position }), color: color)
+    self.renderShape = polyFillShape(points: nodes.map({ n in n.position }), color: color, depth: depth)
   }
   
   func morph(){
-    self.renderShape = polyFillShape(points: nodes.map({ n in n.position }), color: color)
+    self.renderShape = polyFillShape(points: nodes.map({ n in n.position }), color: color, depth: depth)
   }
   
   func getOffsetPositionForNode(_ node: Node) -> CGVector {
@@ -43,6 +44,13 @@ class CanvasFill: CanvasElement {
     
     
     return node.position + offset
+  }
+  
+  func setDepth(depth: Float) {
+    self.depth = depth
+    for i in 0...self.renderShape.verts.count-1 {
+      self.renderShape.verts[i].position[2] = depth
+    }
   }
   
   func render(_ renderer: Renderer) {

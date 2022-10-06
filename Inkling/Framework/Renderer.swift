@@ -10,7 +10,7 @@ import CoreImage.CIFilterBuiltins
 
 // STRUCTS
 struct Vertex {
-  var position: SIMD3<Float>
+  var position: SIMD4<Float>
   var color: SIMD4<Float>
 }
 
@@ -43,6 +43,7 @@ class Renderer: NSObject {
   var commandQueue: MTLCommandQueue!
   var pipelineState: MTLRenderPipelineState!
   var computePipelineState: MTLComputePipelineState!
+  var depthState: MTLDepthStencilState!
   
   // Buffers
   var pointBuffer: MTLBuffer!       // Stroke points are passed through here
@@ -58,6 +59,9 @@ class Renderer: NSObject {
   // Textures
   var samplerState: MTLSamplerState?
   var textures: [MTLTexture] = []
+  
+  // Depth Counting
+  var depthCounter = 0
   
   // Screen size
   var constants = Constants()
@@ -83,6 +87,10 @@ class Renderer: NSObject {
     metalView.preferredFramesPerSecond = 120
     metalView.clearColor = MTLClearColor(red: 0.9921568627, green: 0.9882352941, blue: 0.9843137255, alpha: 1.0) // Off white
     metalView.sampleCount = MSAA
+    
+    metalView.depthStencilPixelFormat = MTLPixelFormat.depth32Float
+    metalView.clearDepth = 0.0
+
   }
   
   private func createBuffers(){
@@ -101,12 +109,12 @@ class Renderer: NSObject {
   }
 
   private func createPipelineState(){
-    // Load shaders
+    /* LOAD SHADERS */
     let library = device.makeDefaultLibrary()
     let vertexFunction = library?.makeFunction(name: "vertex_shader")
     let fragmentFunction = library?.makeFunction(name: "fragment_shader")
 
-    // Setup a pipeline descriptor
+    /* RENDER PIPELINE */
     let pipelineDescriptor = MTLRenderPipelineDescriptor()
     pipelineDescriptor.vertexFunction = vertexFunction
     pipelineDescriptor.fragmentFunction = fragmentFunction
@@ -115,12 +123,12 @@ class Renderer: NSObject {
 
     // Create vertex descriptor
     let vertexDescriptor = MTLVertexDescriptor()
-    vertexDescriptor.attributes[0].format = .float3
+    vertexDescriptor.attributes[0].format = .float4
     vertexDescriptor.attributes[0].offset = 0
     vertexDescriptor.attributes[0].bufferIndex = 0
     
     vertexDescriptor.attributes[1].format = .float4
-    vertexDescriptor.attributes[1].offset = MemoryLayout<SIMD3<Float>>.stride
+    vertexDescriptor.attributes[1].offset = MemoryLayout<SIMD4<Float>>.stride
     vertexDescriptor.attributes[1].bufferIndex = 0
     
     vertexDescriptor.layouts[0].stride = MemoryLayout<Vertex>.stride
@@ -136,14 +144,25 @@ class Renderer: NSObject {
     pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor   = MTLBlendFactor.oneMinusSourceAlpha;
     pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactor.oneMinusSourceAlpha;
     
+    // Settings for depth buffer
+    pipelineDescriptor.depthAttachmentPixelFormat = MTLPixelFormat.depth32Float
+
+    // Create Pipeline
     do {
       pipelineState = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
     } catch let error as NSError {
       print("error: \(error.localizedDescription)")
     }
     
-    // Compute Pipeline
+    /* DEPTH BUFFER */
+    let depthDescriptor = MTLDepthStencilDescriptor()
+    depthDescriptor.depthCompareFunction = MTLCompareFunction.greaterEqual
+    depthDescriptor.isDepthWriteEnabled = true
+    depthState = device.makeDepthStencilState(descriptor: depthDescriptor)
     
+    
+    
+    /* COMPUTE PIPELINE */
     // Get Compute function
     let geometryGPUFunction = library?.makeFunction(name: "compute_line_geometry")
     
@@ -297,10 +316,10 @@ class Renderer: NSObject {
     indexBufferSize += shape.indices.count
   }
   
-  public func loadStrokes(data: [Vertex]) {
-    pointBuffer.contents().copyMemory(from: data, byteCount: data.count * MemoryLayout<Vertex>.stride)
-    pointBufferSize = data.count
-  }
+//  public func loadStrokes(data: [Vertex]) {
+//    pointBuffer.contents().copyMemory(from: data, byteCount: data.count * MemoryLayout<Vertex>.stride)
+//    pointBufferSize = data.count
+//  }
   
   public func addStrokeData(_ data: [Vertex]) {
     let byteOffset = MemoryLayout<Vertex>.stride * pointBufferSize
@@ -341,12 +360,10 @@ extension Renderer: MTKViewDelegate {
       computeCommandEncoder.endEncoding()
     }
     
-    
-    
-    
     /* Render Pass */
     let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: descriptor)!
     commandEncoder.setRenderPipelineState(pipelineState)
+    commandEncoder.setDepthStencilState(depthState)
 
     commandEncoder.setVertexBytes(&constants, length: MemoryLayout<Constants>.stride, index: 1)
 

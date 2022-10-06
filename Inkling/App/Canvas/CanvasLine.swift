@@ -61,6 +61,10 @@ class CanvasLine: CanvasElement {
     return node.position + (other.position - node.position).normalized() * CGFloat.minimum(quaterDistance, 30.0)
   }
   
+  func setDepth(depth: Float) {
+    stroke.setDepth(depth: depth)
+  }
+  
   func render(_ renderer: Renderer) {
     stroke.render(renderer)
   }

@@ -99,10 +99,10 @@ func imageShape(a: CGVector, b: CGVector, texture: Int) -> RenderShape {
   let texture_id = Float(texture)
   
   let verts = [
-    Vertex(position: [Float(a.dx), Float(a.dy), 0], color: [-1.0, texture_id, 0.0, 0.0]),
-    Vertex(position: [Float(b.dx), Float(a.dy), 0], color: [-1.0, texture_id, 1.0, 0.0]),
-    Vertex(position: [Float(b.dx), Float(b.dy), 0], color: [-1.0, texture_id, 1.0, 1.0]),
-    Vertex(position: [Float(a.dx), Float(b.dy), 0], color: [-1.0, texture_id, 0.0, 1.0]),
+    Vertex(position: [Float(a.dx), Float(a.dy), 0, 0], color: [-1.0, texture_id, 0.0, 0.0]),
+    Vertex(position: [Float(b.dx), Float(a.dy), 0, 0], color: [-1.0, texture_id, 1.0, 0.0]),
+    Vertex(position: [Float(b.dx), Float(b.dy), 0, 0], color: [-1.0, texture_id, 1.0, 1.0]),
+    Vertex(position: [Float(a.dx), Float(b.dy), 0, 0], color: [-1.0, texture_id, 0.0, 1.0]),
   ]
 
 
@@ -126,7 +126,7 @@ func circleShape(pos: CGVector, radius: Float, resolution: Int, color: Color) ->
   var verts: [Vertex] = []
   for i in 0..<resolution {
     let fi = Float(i)
-    verts.append(Vertex(position: SIMD3<Float>(x + cos(fi*circleFactor) * radius , y + sin(fi*circleFactor) * radius, 0), color: color))
+    verts.append(Vertex(position: SIMD4<Float>(x + cos(fi*circleFactor) * radius , y + sin(fi*circleFactor) * radius, 0, 0), color: color))
   }
   
   var indices: [UInt16] = []
@@ -152,8 +152,8 @@ func circleLineShape(pos: CGVector, radius: Float, resolution: Int, width: Float
   var verts: [Vertex] = []
   for i in 0...resolution {
     let fi = Float(i)
-    verts.append(Vertex(position: SIMD3<Float>(x + cos(fi*circleFactor) * (radius - hWidth), y + sin(fi*circleFactor) * (radius - hWidth), 0), color: color))
-    verts.append(Vertex(position: SIMD3<Float>(x + cos(fi*circleFactor) * (radius + hWidth), y + sin(fi*circleFactor) * (radius + hWidth), 0), color: color))
+    verts.append(Vertex(position: SIMD4<Float>(x + cos(fi*circleFactor) * (radius - hWidth), y + sin(fi*circleFactor) * (radius - hWidth), 0, 0), color: color))
+    verts.append(Vertex(position: SIMD4<Float>(x + cos(fi*circleFactor) * (radius + hWidth), y + sin(fi*circleFactor) * (radius + hWidth), 0, 0), color: color))
   }
   
   var indices: [UInt16] = []
@@ -176,12 +176,12 @@ func circleLineShape(pos: CGVector, radius: Float, resolution: Int, width: Float
   return RenderShape (verts: verts, indices: indices)
 }
 
-func polyFillShape(points: [CGVector], color: Color) -> RenderShape {
+func polyFillShape(points: [CGVector], color: Color, depth: Float = 0) -> RenderShape {
   let color = color.as_simd()
   
   var verts: [Vertex] = []
   for p in points {
-    verts.append(Vertex(position: SIMD3<Float>(Float(p.dx), Float(p.dy), 0), color: color))
+    verts.append(Vertex(position: SIMD4<Float>(Float(p.dx), Float(p.dy), depth, 0), color: color))
   }
   
   let indices = triangulatePolygon(points).map({ i in

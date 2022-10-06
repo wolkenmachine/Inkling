@@ -16,6 +16,8 @@ class Stroke {
   var color: Color
   var verts: [Vertex]
   
+  var depth: Float = 0.0
+  
   init(_ points: [CGVector], _ weights: [CGFloat], _ color: Color) {
     assert(points.count == weights.count)
     
@@ -124,18 +126,23 @@ class Stroke {
     )
   }
   
+  func setDepth(depth: Float) {
+    self.depth = depth
+    updateVerts()
+  }
+  
   func updateVerts(){
     verts = []
     
     let first = points.first!
     let first_weight = weights.first!
-    verts.append(Vertex(position: SIMD3(Float(first.dx), Float(first.dy), Float(first_weight)), color: color.as_simd_transparent()))
+    verts.append(Vertex(position: SIMD4(Float(first.dx), Float(first.dy), depth, Float(first_weight)), color: color.as_simd_transparent()))
     for (pt, weight) in zip(points, weights) {
-      verts.append(Vertex(position: SIMD3(Float(pt.dx), Float(pt.dy), Float(weight)), color: color.as_simd()))
+      verts.append(Vertex(position: SIMD4(Float(pt.dx), Float(pt.dy), depth, Float(weight)), color: color.as_simd()))
     }
     let last = points.last!
     let last_weight = weights.last!
-    verts.append(Vertex(position: SIMD3(Float(last.dx), Float(last.dy), Float(last_weight)), color: color.as_simd_transparent()))
+    verts.append(Vertex(position: SIMD4(Float(last.dx), Float(last.dy), depth, Float(last_weight)), color: color.as_simd_transparent()))
   }
   
   func render(_ renderer: Renderer) {

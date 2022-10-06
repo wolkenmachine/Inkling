@@ -16,7 +16,6 @@ class App {
   
   var strokeCapture: StrokeCapture!
   var selectionCapture: SelectionCaputure!
-  //var guideModeCapture: GuideModeCapture!
   
   var draggingMode: DraggingMode?
   var selectionMode: SelectionMode?
@@ -37,7 +36,6 @@ class App {
     
     strokeCapture = StrokeCapture()
     selectionCapture = SelectionCaputure()
-    //guideModeCapture = GuideModeCapture()
     
     pseudoMode = PseudoModeInput()
   }
@@ -159,7 +157,7 @@ class App {
       selectionMode.render(renderer)
     }
     
-
+    
   }
   
   func loadImage(imageUrl: String){

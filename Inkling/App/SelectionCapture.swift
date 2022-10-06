@@ -55,15 +55,15 @@ class SelectionCaputure {
     predicted_points = []
     verts = []
     
-    verts.append(Vertex(position: SIMD3(Float(pos.dx), Float(pos.dy), Float(1.0)), color: color.as_simd_transparent()))
-    verts.append(Vertex(position: SIMD3(Float(pos.dx), Float(pos.dy), Float(1.0)), color: color.as_simd()))
+    verts.append(Vertex(position: SIMD4(Float(pos.dx), Float(pos.dy), 0.0, 1.0), color: color.as_simd_transparent()))
+    verts.append(Vertex(position: SIMD4(Float(pos.dx), Float(pos.dy), 0.0, 1.0), color: color.as_simd()))
   }
   
   func add_point(_ pos: CGVector, _ weight: CGFloat){
     if active {
       if distance(points.last!, pos) > 5.0 {
         points.append(pos)
-        verts.append(Vertex(position: SIMD3(Float(pos.dx), Float(pos.dy), Float(weight)), color: color.as_simd()))
+        verts.append(Vertex(position: SIMD4(Float(pos.dx), Float(pos.dy), 0.0, 1.0), color: color.as_simd()))
       }
       
     }
@@ -91,7 +91,7 @@ class SelectionCaputure {
     // Render line
     if points.count > 0 {
       let predicted_verts = predicted_points.map { (pt) in
-        Vertex(position: SIMD3(Float(pt.dx), Float(pt.dy), Float(1.0)), color: color.as_simd())
+        Vertex(position: SIMD4(Float(pt.dx), Float(pt.dy), 0.0, 1.0), color: color.as_simd())
       }
        
       var joined_verts = verts + predicted_verts

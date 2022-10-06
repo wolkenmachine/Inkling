@@ -59,15 +59,15 @@ class StrokeCapture {
     predicted_weights = []
     verts = []
     
-    verts.append(Vertex(position: SIMD3(Float(pos.dx), Float(pos.dy), Float(weight)), color: color.as_simd_transparent()))
-    verts.append(Vertex(position: SIMD3(Float(pos.dx), Float(pos.dy), Float(weight)), color: color.as_simd()))
+    verts.append(Vertex(position: SIMD4(Float(pos.dx), Float(pos.dy), 0.0, Float(weight)), color: color.as_simd_transparent()))
+    verts.append(Vertex(position: SIMD4(Float(pos.dx), Float(pos.dy), 0.0, Float(weight)), color: color.as_simd()))
   }
   
   func add_point(_ pos: CGVector, _ weight: CGFloat){
     if active {
       points.append(pos)
       weights.append(weight)
-      verts.append(Vertex(position: SIMD3(Float(pos.dx), Float(pos.dy), Float(weight)), color: color.as_simd()))
+      verts.append(Vertex(position: SIMD4(Float(pos.dx), Float(pos.dy), 0.0, Float(weight)), color: color.as_simd()))
     }
   }
   
@@ -98,7 +98,7 @@ class StrokeCapture {
     }
     
     let predicted_verts = zip(predicted_points, predicted_weights).map { (pt, weight) in
-      Vertex(position: SIMD3(Float(pt.dx), Float(pt.dy), Float(weight)), color: color.as_simd())
+      Vertex(position: SIMD4(Float(pt.dx), Float(pt.dy), 0.0, Float(weight)), color: color.as_simd())
     }
      
     var joined_verts = verts + predicted_verts

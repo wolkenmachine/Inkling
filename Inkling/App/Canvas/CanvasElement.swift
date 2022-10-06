@@ -12,6 +12,7 @@ protocol CanvasElement: AnyObject {
   var nodes: [Node] { get set }
   
   func render(_ renderer: Renderer)
+  func setDepth(depth: Float)
   func morph()
   
   func getOffsetPositionForNode(_ node: Node) -> CGVector

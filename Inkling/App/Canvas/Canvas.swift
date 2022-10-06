@@ -16,6 +16,7 @@ class Canvas {
   var clusters: NodeClusters = NodeClusters()
   var handles: [BezierNode] = []
   var selection: CanvasSelection? = nil
+  var depthCount: Float = 0
   
   func addStroke(_ stroke: Stroke) {
     let line_segments = analyseStroke(stroke)
@@ -33,6 +34,8 @@ class Canvas {
   }
   
   func addElement(_ element: CanvasElement) {
+    depthCount += 0.0001
+    element.setDepth(depth: depthCount)
     elements.append(element)
     
     for node in element.nodes {

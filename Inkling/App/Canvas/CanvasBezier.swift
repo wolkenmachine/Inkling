@@ -60,6 +60,10 @@ class CanvasBezier: CanvasElement {
     return node.position + (other.position - node.position).normalized() * 20.0
   }
   
+  func setDepth(depth: Float) {
+    stroke.setDepth(depth: depth)
+  }
+  
   func render(_ renderer: Renderer) {
     stroke.render(renderer)
   }

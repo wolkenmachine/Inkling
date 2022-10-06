@@ -14,7 +14,7 @@ struct Constants {
 };
 
 struct VertexIn {
-  float3 position [[ attribute(0) ]];
+  float4 position [[ attribute(0) ]];
   float4 color [[ attribute(1) ]];
 };
 
@@ -27,7 +27,7 @@ struct VertexOut {
 vertex VertexOut vertex_shader(const VertexIn vertexIn [[ stage_in ]],
                                constant Constants &constants [[buffer(1)]]) {
   
-  float4 position = float4(vertexIn.position.x, vertexIn.position.y, 0, 1);
+  float4 position = float4(vertexIn.position.x, vertexIn.position.y, vertexIn.position.z, 1);
   //float4 position = vertexIn.position;
   position.x = (position.x / constants.screen_width)* 2 - 1;
   position.y = -((position.y / constants.screen_height)* 2 - 1);

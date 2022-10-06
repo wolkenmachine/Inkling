@@ -9,7 +9,7 @@
 using namespace metal;
 
 struct Point {
-  float3 position [[ attribute(0) ]];
+  float4 position [[ attribute(0) ]];
   float4 color [[ attribute(1) ]];
 };
 
@@ -20,9 +20,9 @@ kernel void compute_line_geometry(constant Point *input  [[ buffer(0) ]],
   Point a = input[index    ];
   Point b = input[index + 1];
   
-  float3 diff = normalize(b.position - a.position) * (0.7 + (a.position.z / 3));
-  float3 left_offset = float3(a.position.x + diff.y, a.position.y - diff.x, 0);
-  float3 right_offset = float3(a.position.x - diff.y, a.position.y + diff.x, 0);
+  float4 diff = normalize(b.position - a.position) * (0.7 + (a.position.a / 3));
+  float4 left_offset = float4(a.position.x + diff.y, a.position.y - diff.x, a.position.z, 0);
+  float4 right_offset = float4(a.position.x - diff.y, a.position.y + diff.x, a.position.z, 0);
   
   uint out_index = index*2;
   output[out_index] = Point {
