@@ -9,7 +9,8 @@ import JavaScriptCore
 import Foundation
 
 let scriptUrls = [
-  "http://Patricks-M1-MacBook.local:8000/main.js"
+  //"http://Patricks-M1-MacBook.local:8000/main.js",
+  "http://192.168.178.38:8000/main.js"
 ]
 
 class ScriptLoader {
@@ -44,6 +45,7 @@ class ScriptLoader {
       do {
         let scriptContents = try String(contentsOf: url)
         context.evaluateScript(scriptContents)
+        print("Loaded script from \(url)")
       } catch {
         print("Unable to load script from \(url)")
       }
