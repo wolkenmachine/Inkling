@@ -1,11 +1,11 @@
 import Vec from "../lib/vec";
 import ArcSegment from "./strokes/ArcSegment";
 import LineSegment from "./strokes/LineSegment";
-import FreehandStroke from "./strokes/FreehandStrokeMorph";
+import FreehandStroke from "./strokes/FreehandStroke";
 
 import Point from "./strokes/Point";
 import MorphPoint from "./strokes/MorphPoint";
-import MorphGroup from "./strokes/MorphGroup";
+import StrokeGraph from "./strokes/StrokeGraph";
 
 export default class Page {
     constructor(svg) {
@@ -18,7 +18,7 @@ export default class Page {
         this.lineSegments = [];
         this.freehandStrokes = [];
 
-        this.morphGroup = new MorphGroup();
+        this.strokeGraph = new StrokeGraph();
     }
 
     addPoint(position) {
@@ -48,7 +48,7 @@ export default class Page {
     addFreehandStroke(points) {
         const s = new FreehandStroke(this.svg, points);
         this.freehandStrokes.push(s)
-        this.morphGroup.addStroke(s);
+        this.strokeGraph.addStroke(s);
         return s;
     }
 
@@ -170,6 +170,6 @@ export default class Page {
         this.freehandStrokes.forEach(renderIt);
         this.points.forEach(renderIt);
         this.morphPoints.forEach(renderIt);
-        this.morphGroup.render(svg);
+        this.strokeGraph.render(svg);
     }
 }

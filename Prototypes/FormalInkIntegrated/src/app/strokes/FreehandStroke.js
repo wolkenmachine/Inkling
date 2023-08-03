@@ -35,6 +35,14 @@ export default class FreehandStroke {
         };
     }
 
+    getFirstPoint(){
+        return this.points[0];
+    }
+
+    getLastPoint(){
+        return this.points[this.points.length - 1];
+    }
+
     move(position) {
         this.dirty = true;
         this.position = position;
