@@ -20,18 +20,16 @@ export default class FreehandStroke {
                         fill: 'none',
                     }
                 ),
-            // selected:
-            //     svg.addElement(
-            //         'line',
-            //         {
-            //             x1: this.a.position.x,
-            //             y1: this.a.position.y,
-            //             x2: this.b.position.x,
-            //             y2: this.b.position.y,
-            //             'stroke-width': 7,
-            //             stroke: 'none'
-            //         }
-            //     )
+            selected:
+                svg.addElement(
+                    'path',
+                    {
+                        d: path,
+                        'stroke-width': 7,
+                        stroke: 'none',
+                        fill: 'none',
+                    }
+                )
         };
     }
 
@@ -59,29 +57,26 @@ export default class FreehandStroke {
     }
 
     render(svg) {
-        if (this.dirty) {
-            // svg.updateElement(
-            //     this.elements.normal,
-            //     {
-            //         x1: this.a.position.x,
-            //         y1: this.a.position.y,
-            //         x2: this.b.position.x,
-            //         y2: this.b.position.y,
-            //     }
-            // );
-
-            // svg.updateElement(
-            //     this.elements.selected,
-            //     {
-            //         x1: this.a.position.x,
-            //         y1: this.a.position.y,
-            //         x2: this.b.position.x,
-            //         y2: this.b.position.y,
-            //         stroke: this.selected ? 'rgba(180, 134, 255, 0.42)' : 'none'
-            //     }
-            // );
-
-            this.dirty = false;
+        if (!this.dirty) {
+            return
         }
+
+        const path = generatePathFromPoints(this.points);
+        svg.updateElement(
+            this.elements.normal,
+            {
+                d: path
+            }
+        );
+
+        svg.updateElement(
+            this.elements.selected,
+            {
+                d: path,
+                stroke: this.selected ? 'rgba(180, 134, 255, 0.42)' : 'none'
+            }
+        );
+
+        this.dirty = false;
     }
 }

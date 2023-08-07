@@ -10,6 +10,7 @@ import FreehandTool from "./tools/FreehandTool";
 import TextTool from "./tools/TextTool";
 
 import MorphPhysics from "./MorphPhysics";
+import FreehandSelection from "./FreehandSelection";
 
 export default class App {
     constructor() {
@@ -20,6 +21,7 @@ export default class App {
 
 
         // this.selection = new Selection(this.page, this.snaps);
+        this.selection = new FreehandSelection(this.page);
 
         //this.morphing = new Morphing(this.page);
 
@@ -57,7 +59,7 @@ export default class App {
         this.tools[this.toolPicker.selected].update(events);
 
         //this.morphing.update(events);
-        //this.selection.update(events);
+        this.selection.update(events);
         //this.morphPhysics.update(events);
     }
 
@@ -66,6 +68,8 @@ export default class App {
         this.tools[this.toolPicker.selected].render(this.svg);
         this.snaps.render(this.svg);
         this.page.render(this.svg);
+
+        this.selection.render(this.svg);
 
         //this.morphPhysics.render(this.svg);
     }

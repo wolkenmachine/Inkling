@@ -82,6 +82,22 @@ export default class Page {
         return closestPoint;
     }
 
+    findFreehandStrokeNear(position, dist = 20) {
+        let closestStroke = null;
+        let closestDistance = dist;
+        for(const stroke of this.freehandStrokes) {
+            for(const point of stroke.points) {
+                const d = Vec.dist(point, position);
+                if (d < closestDistance) {
+                    closestDistance = d;
+                    closestStroke = stroke;
+                }
+            }
+        }
+
+        return closestStroke
+    }
+
     mergePoint(point) {
         const pointsToMerge =
             new Set(

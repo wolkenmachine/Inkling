@@ -93,8 +93,10 @@ export default class StrokeGraph {
                 loop.push(connection.position);
             }
 
-            this.loops.push(loop);
-            console.log(loop);
+            this.loops.push({
+                strokes: trace,
+                points: loop
+            });
         }
 
 
@@ -108,18 +110,18 @@ export default class StrokeGraph {
             return
         }
 
-        this.elements.forEach(elem=>elem.remove());
+        // this.elements.forEach(elem=>elem.remove());
 
-        this.elements = this.connections.map(c=>{
-            // let start = this.strokes[c.a].points[c.indexA]
-            // let end = this.strokes[c.b].points[c.indexB]
-            return svg.addElement('circle', { cx: c.position.x, cy: c.position.y, r: 3, fill: 'pink' })
-        })
+        // this.elements = this.connections.map(c=>{
+        //     // let start = this.strokes[c.a].points[c.indexA]
+        //     // let end = this.strokes[c.b].points[c.indexB]
+        //     return svg.addElement('circle', { cx: c.position.x, cy: c.position.y, r: 3, fill: 'pink' })
+        // })
 
-        this.loop_elements.forEach(elem=>elem.remove());
-        this.loop_elements = this.loops.map(loop=>{
-            return svg.addElement('path', {d: generatePathFromPoints(loop), fill: 'rgba(255, 0, 0, 0.1)'})
-        })
+        // this.loop_elements.forEach(elem=>elem.remove());
+        // this.loop_elements = this.loops.map(loop=>{
+        //     return svg.addElement('path', {d: generatePathFromPoints(loop), fill: 'rgba(255, 0, 0, 0.1)'})
+        // })
         
 
         this.dirty = false;
