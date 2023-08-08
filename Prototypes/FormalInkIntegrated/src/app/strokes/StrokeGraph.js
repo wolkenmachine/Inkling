@@ -11,93 +11,112 @@ export default class StrokeGraph {
     }
 
     addStroke(stroke){
-        let endPoints = [stroke.getFirstPoint(), stroke.getLastPoint()];
-
-        // Find connections with other strokes
+        // Match closest strokes
         for(const otherStroke of this.strokes) {
-            for(const pt of endPoints) {
-                const closestPoint = findClosestPointTo(pt, otherStroke.points);
-                if(closestPoint.dist < 20) {
-                    this.connections.push({type: "point", position: pt, a: stroke, b: otherStroke, ...closestPoint});
-                }
-            }
+            const closestPoint = closestPointsBetweenStrokes(stroke.points, otherStroke.points);
+            console.log(closestPoint);
+            if(closestPoint.dist < 20) {
+                const midPoint = Vec.mulS(Vec.add(stroke.points[closestPoint.indexA], otherStroke.points[closestPoint.indexB]), 0.5);
+                // Categorize node
+                let dirA = getDirectionAtStrokePoint(stroke.points, closestPoint.indexA);
+                let dirB = getDirectionAtStrokePoint(otherStroke.points, closestPoint.indexB);
+                // similarity between strokes as determined by cross product;
+                let aligned = Math.abs(Vec.cross(dirA, dirB)) < 0.5;
+                //console.log("similarity", similarity);
 
-            // Inverse
-            let otherEndPoints = [otherStroke.getFirstPoint(), otherStroke.getLastPoint()];
-            for(const pt of otherEndPoints) {
-                const closestPoint = findClosestPointTo(pt, stroke.points);
-                if(closestPoint.dist < 20) {
-                    this.connections.push({type: "point", position: pt, a: otherStroke, b: stroke, ...closestPoint});
-                }
+                this.connections.push({position: midPoint, strokes: [stroke, otherStroke], indexes: [closestPoint.indexA, closestPoint.indexB], aligned});
             }
         }
 
+        console.log(this.connections);
+
+        // EndPoint Matches
+        // let endPoints = [stroke.getFirstPoint(), stroke.getLastPoint()];
+
+        // // Find connections with other strokes
+        // for(const otherStroke of this.strokes) {
+        //     for(const pt of endPoints) {
+        //         const closestPoint = findClosestPointTo(pt, otherStroke.points);
+        //         if(closestPoint.dist < 20) {
+        //             this.connections.push({type: "point", position: pt, a: stroke, b: otherStroke, ...closestPoint});
+        //         }
+        //     }
+
+        //     // Inverse
+        //     let otherEndPoints = [otherStroke.getFirstPoint(), otherStroke.getLastPoint()];
+        //     for(const pt of otherEndPoints) {
+        //         const closestPoint = findClosestPointTo(pt, stroke.points);
+        //         if(closestPoint.dist < 20) {
+        //             this.connections.push({type: "point", position: pt, a: otherStroke, b: stroke, ...closestPoint});
+        //         }
+        //     }
+        // }
 
 
-        // Do a breadth first search to find loops
+        // FIND LOOPS (BREADTH FIRST)
+        // TODO: Do search based on perceptual continuation properties
+        // console.log("-- search");
+        // const queue = [stroke];
 
-        console.log("-- search");
-        const queue = [stroke];
+        // const visited = new Set();
+        // visited.add(stroke);
 
-        const visited = new Set();
-        visited.add(stroke);
+        // const backtrack = new Map();
 
-        const backtrack = new Map();
+        // let found = null
+        // let otherDirection = null;
 
-        let found = null
-        let otherDirection = null;
+        // outerloop: while(queue.length > 0) {
+        //     let currentStroke = queue.shift();
 
-        outerloop: while(queue.length > 0) {
-            let currentStroke = queue.shift();
-
-            // Find connected strokes
-            let connectedStrokes = this.connections.filter(c=>{
-                return c.a === currentStroke && backtrack.get(currentStroke) !== c.b;
-            }).map(c=>c.b);
+        //     // Find connected strokes
+        //     let connectedStrokes = this.connections.filter(c=>{
+        //         return c.a === currentStroke && backtrack.get(currentStroke) !== c.b;
+        //     }).map(c=>c.b);
     
-            for(const otherStroke of connectedStrokes) {
-                if(visited.has(otherStroke)) {
-                    console.log("found loop by meeting in the middle");
-                    found = otherStroke;
-                    otherDirection = currentStroke;
-                    break outerloop;
-                }
-                visited.add(otherStroke);
-                backtrack.set(otherStroke, currentStroke);
-                queue.push(otherStroke);
-            }
-        }
+        //     for(const otherStroke of connectedStrokes) {
+        //         if(visited.has(otherStroke)) {
+        //             console.log("found loop by meeting in the middle");
+        //             found = otherStroke;
+        //             otherDirection = currentStroke;
+        //             break outerloop;
+        //         }
+        //         visited.add(otherStroke);
+        //         backtrack.set(otherStroke, currentStroke);
+        //         queue.push(otherStroke);
+        //     }
+        // }
         
-        if(found !== null) {
-            let currentStroke = found
-            let trace = [found]
-            while(currentStroke != stroke) {
-                currentStroke = backtrack.get(currentStroke)
-                trace.push(currentStroke)
-            }
+        // if(found !== null) {
+        //     let currentStroke = found
+        //     let trace = [found]
+        //     while(currentStroke != stroke) {
+        //         currentStroke = backtrack.get(currentStroke)
+        //         trace.push(currentStroke)
+        //     }
 
-            currentStroke = otherDirection
-            trace.unshift(otherDirection)
-            while(currentStroke != stroke) {
-                currentStroke = backtrack.get(currentStroke)
-                trace.unshift(currentStroke)
-            }
+        //     currentStroke = otherDirection
+        //     trace.unshift(otherDirection)
+        //     while(currentStroke != stroke) {
+        //         currentStroke = backtrack.get(currentStroke)
+        //         trace.unshift(currentStroke)
+        //     }
 
-            //trace.pop();
+        //     //trace.pop();
 
-            let loop = [];
-            for (let i = 0; i < trace.length-1; i++) {
-                const a = trace[i];
-                const b = trace[i+1];
-                const connection = this.connections.find(c=>c.a == a && c.b == b);
-                loop.push(connection.position);
-            }
+        //     let loop = [];
+        //     for (let i = 0; i < trace.length-1; i++) {
+        //         const a = trace[i];
+        //         const b = trace[i+1];
+        //         const connection = this.connections.find(c=>c.a == a && c.b == b);
+        //         loop.push(connection.position);
+        //     }
 
-            this.loops.push({
-                strokes: trace,
-                points: loop
-            });
-        }
+        //     this.loops.push({
+        //         strokes: trace,
+        //         points: loop
+        //     });
+        // }
 
 
 
@@ -110,13 +129,13 @@ export default class StrokeGraph {
             return
         }
 
-        // this.elements.forEach(elem=>elem.remove());
+        this.elements.forEach(elem=>elem.remove());
 
-        // this.elements = this.connections.map(c=>{
-        //     // let start = this.strokes[c.a].points[c.indexA]
-        //     // let end = this.strokes[c.b].points[c.indexB]
-        //     return svg.addElement('circle', { cx: c.position.x, cy: c.position.y, r: 3, fill: 'pink' })
-        // })
+        this.elements = this.connections.map(c=>{
+            // let start = this.strokes[c.a].points[c.indexA]
+            // let end = this.strokes[c.b].points[c.indexB]
+            return svg.addElement('circle', { cx: c.position.x, cy: c.position.y, r: 3, fill: c.aligned ? 'pink': 'green' })
+        })
 
         // this.loop_elements.forEach(elem=>elem.remove());
         // this.loop_elements = this.loops.map(loop=>{
@@ -142,4 +161,38 @@ function findClosestPointTo(point, stroke) {
     }
 
     return {dist: minDist, index}
+}
+
+function closestPointsBetweenStrokes(strokeA, strokeB) {
+    let minDist = Vec.dist(strokeA[0], strokeB[0]);
+    let indexA = 0;
+    let indexB = 0;
+
+    for (let i = 0; i < strokeA.length; i++) {
+        for (let j = 0; j < strokeB.length; j++) {
+            const dist = Vec.dist(strokeA[i], strokeB[j]);
+            if(dist < minDist) {
+                minDist = dist;
+                indexA = i;
+                indexB = j;
+            }
+        }
+    }
+
+    return {dist: minDist, indexA, indexB}
+}
+
+function getDirectionAtStrokePoint(stroke, index){
+    console.log(stroke, index);
+    let backwardIndex = index - 10;
+    if(backwardIndex < 0) {
+        backwardIndex = 0;
+    }
+
+    let forwardIndex = index + 10;
+    if(forwardIndex > stroke.length-1) {
+        forwardIndex = stroke.length-1;
+    }
+
+    return Vec.normalize(Vec.sub(stroke[backwardIndex], stroke[forwardIndex]));
 }

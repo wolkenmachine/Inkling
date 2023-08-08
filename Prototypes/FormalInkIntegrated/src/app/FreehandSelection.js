@@ -29,7 +29,7 @@ export default class FreehandSelection {
                     this.selectPolygon = [this.finger.position];
                     this.dirty = true;
                 }
-            }, 500)
+            }, 750)
 
             this.lastFingerDown = fingerDown.timestamp;
             this.finger = fingerDown
