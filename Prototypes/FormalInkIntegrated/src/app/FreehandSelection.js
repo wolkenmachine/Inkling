@@ -35,15 +35,10 @@ export default class FreehandSelection {
             this.finger = fingerDown
             let found = this.page.findFreehandStrokeNear(fingerDown.position)
             if(found) {
+                // If we've already selected this stroke
                 if(found == this.holding) {
-                    
-                    // Check if connected to any loops
-                    let loop = this.page.strokeGraph.loops.find(loop=>{
-                        return loop.strokes.find(s=>s==found)
-                    })
-                    if(loop) {
-                        loop.strokes.forEach(l=>this.select(l))
-                    }
+                    let cluster = this.page.strokeGraph.getStrokeCluster(found);
+                    cluster.forEach(l=>this.select(l));
                 } else {
                     this.holding = found
                     this.select(found)
@@ -111,15 +106,17 @@ export default class FreehandSelection {
 
             const fingerUp = events.did('finger', 'ended', this.finger.id)
             if(fingerUp && !this.holding) {
-                this.clearSelection()
-                this.finger = null
-                this.fingerMoved = null
-            }
+                if(!this.fingerMoved) {
+                    this.clearSelection();
+                }
 
-            if(fingerUp){
+                this.fingerMoved = null
+                this.finger = null
                 this.selectPolygon = null
+
                 this.dirty = true
             }
+
         }
 
 

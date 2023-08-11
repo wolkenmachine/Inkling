@@ -5,9 +5,52 @@ export default class StrokeGraph {
     constructor (){
         this.strokes = [];
         this.connections = [];
-        this.loops = [];
         this.elements = [];
+
+        this.clusters = [];
+
+        this.loops = [];
         this.loop_elements = [];
+    }
+
+    generateClusters(){
+        // Do a depth first search to generate all connected clusters
+        // TODO: Make this less terrible
+        let clusters = [];
+        let visitList = this.strokes.map(s=>s);
+
+        while(visitList.length > 0) {
+            let currentStroke = visitList.pop();
+            let cluster = [currentStroke];
+            let queue = [currentStroke];
+
+            while(queue.length > 0) {
+                let nextInQueue = queue.pop();
+                // find connected elements
+                let connected = this.connections
+                    .filter(c=>c.strokes.indexOf(nextInQueue) > - 1)
+                    .map(c=>c.strokes.filter(s=>s!=nextInQueue)[0])
+
+                for(const c of connected) {
+                    if(!cluster.find(s=>s==c)) {
+                        cluster.push(c);
+                        visitList = visitList.filter(s=>s!=c);
+                        queue.push(c);
+                    }
+                }
+            }
+
+            clusters.push(cluster);
+            
+        }
+        this.clusters = clusters;
+
+    }
+
+    getStrokeCluster(stroke) {
+        return this.clusters.find(cluster=>{
+            return cluster.find(s=>s==stroke)
+        })
     }
 
     addStroke(stroke){
@@ -21,7 +64,7 @@ export default class StrokeGraph {
                 let dirA = getDirectionAtStrokePoint(stroke.points, closestPoint.indexA);
                 let dirB = getDirectionAtStrokePoint(otherStroke.points, closestPoint.indexB);
                 // similarity between strokes as determined by cross product;
-                let aligned = Math.abs(Vec.cross(dirA, dirB)) < 0.5;
+                let aligned = Math.abs(Vec.cross(dirA, dirB)) < 0.3;
                 //console.log("similarity", similarity);
 
                 this.connections.push({position: midPoint, strokes: [stroke, otherStroke], indexes: [closestPoint.indexA, closestPoint.indexB], aligned});
@@ -122,6 +165,8 @@ export default class StrokeGraph {
 
         this.strokes.push(stroke);
         this.dirty = true;
+
+        this.generateClusters();
     }
 
     render(svg) {
@@ -129,13 +174,11 @@ export default class StrokeGraph {
             return
         }
 
-        this.elements.forEach(elem=>elem.remove());
+        // this.elements.forEach(elem=>elem.remove());
 
-        this.elements = this.connections.map(c=>{
-            // let start = this.strokes[c.a].points[c.indexA]
-            // let end = this.strokes[c.b].points[c.indexB]
-            return svg.addElement('circle', { cx: c.position.x, cy: c.position.y, r: 3, fill: c.aligned ? 'pink': 'green' })
-        })
+        // this.elements = this.connections.map(c=>{
+        //     return svg.addElement('circle', { cx: c.position.x, cy: c.position.y, r: 3, fill: c.aligned ? 'pink': 'green' })
+        // })
 
         // this.loop_elements.forEach(elem=>elem.remove());
         // this.loop_elements = this.loops.map(loop=>{
