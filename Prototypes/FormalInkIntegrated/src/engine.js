@@ -30,11 +30,22 @@ const events = new Events();
 window.nativeEvent = (eventState, touches) => {
     Object.entries(touches).forEach(([touchId, points]) => {
         points.forEach(point => {
+            //console.log(point.radius);
+            let force = 0
+            if(point.radius > 30) {
+                force = 1
+            }
+            if(point.radius > 40) {
+                force = 2
+            }
+            console.log(force);
+
             events.events.push({
                 type: point.type === 'pencil' ? 'pencil': 'finger',
                 state: eventState,
                 id: touchId,
                 position: { x: point.x, y: point.y },
+                force: point.force,
                 timestamp: point.timestamp,
             });
     

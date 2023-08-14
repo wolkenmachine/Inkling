@@ -1,3 +1,4 @@
+import Vec from "../../lib/vec";
 import { generatePathFromPoints } from "../Svg";
 import generateId from "../generateId";
 
@@ -39,6 +40,21 @@ export default class FreehandStroke {
 
     getLastPoint(){
         return this.points[this.points.length - 1];
+    }
+
+    getPointNear(position, dist = 20){
+        let closestPoint = null;
+        let closestDistance = dist;
+
+        for(const point of this.points) {
+            const d = Vec.dist(point, position);
+            if (d < closestDistance) {
+                closestDistance = d;
+                closestPoint = point;
+            }
+        }
+
+        return closestPoint;
     }
 
     move(position) {

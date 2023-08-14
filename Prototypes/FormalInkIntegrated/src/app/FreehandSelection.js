@@ -1,6 +1,7 @@
 import Polygon from "../lib/polygon"
 import Vec from "../lib/vec"
 import { generatePathFromPoints } from "./Svg"
+import StrokeMorphing from "./strokes/StrokeMorphing"
 
 export default class FreehandSelection {
     constructor(page) {
@@ -18,16 +19,28 @@ export default class FreehandSelection {
         this.selectPolygon = null;
         this.dirty = false;
         this.polygon = null;
+
+        this.morphing = new StrokeMorphing();
     }
 
     update(events) {
         const fingerDown = events.did('finger', 'began');
         if (fingerDown) {
             setTimeout(_=>{
-                if(this.finger && !this.holding && (!this.fingerMoved || Vec.dist(this.finger.position, this.fingerMoved.position) < 20)) {
-                    console.log("hold");
-                    this.selectPolygon = [this.finger.position];
-                    this.dirty = true;
+                // If longpress
+                if(this.finger && (!this.fingerMoved || Vec.dist(this.finger.position, this.fingerMoved.position) < 20)) {
+                    console.log("longpress");
+
+                    if(!this.holding) {
+                        console.log("poly select");
+                        this.selectPolygon = [this.finger.position];
+                        this.dirty = true;
+                    } else {
+                        let group = this.morphing.addGroup(Array.from(this.strokes))
+                        group.controlPoints.push(this.holding.getPointNear(this.finger.position));
+                        console.log(group);
+                        this.dirty = true;
+                    }
                 }
             }, 750)
 
@@ -40,10 +53,9 @@ export default class FreehandSelection {
                     let cluster = this.page.strokeGraph.getStrokeCluster(found);
                     cluster.forEach(l=>this.select(l));
                 } else {
-                    this.holding = found
-                    this.select(found)
+                    this.holding = found;
+                    this.select(found);
                 }
-                
             } else {
                 this.holding = null
                 // Check if tapped inside enclosed region
@@ -110,16 +122,16 @@ export default class FreehandSelection {
                     this.clearSelection();
                 }
 
-                this.fingerMoved = null
-                this.finger = null
-                this.selectPolygon = null
-
                 this.dirty = true
             }
 
+            if(fingerUp) {
+                this.fingerMoved = null
+                this.finger = null
+                this.selectPolygon = null
+                this.dirty = true
+            }
         }
-
-
     }
 
     select(stroke){
@@ -165,6 +177,8 @@ export default class FreehandSelection {
                 )
             }
         }
+
+        this.morphing.render(svg);
 
         
 
