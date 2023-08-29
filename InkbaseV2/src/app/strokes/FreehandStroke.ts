@@ -50,7 +50,7 @@ export default class FreehandStroke extends Stroke {
     return Vec.normalize(Vec.sub(b, a));
   }
 
-  getLength(){
+  getLength() {
     let len = 0;
     for (let i = 0; i < this.points.length - 1; i++) {
       const pointA = this.points[i];
@@ -62,52 +62,56 @@ export default class FreehandStroke extends Stroke {
   }
 
   computeLengths() {
-    let lengths = []
-    let length_accumulator = 0
-    lengths.push(length_accumulator)
+    const lengths = [];
+    let length_accumulator = 0;
+    lengths.push(length_accumulator);
 
-    for(let i=0; i < this.points.length-1; i++) {
-      let length = Vec.dist(this.points[i + 1], this.points[i]);
-      length_accumulator += length
-      lengths.push(length_accumulator)
+    for (let i = 0; i < this.points.length - 1; i++) {
+      const length = Vec.dist(this.points[i + 1], this.points[i]);
+      length_accumulator += length;
+      lengths.push(length_accumulator);
     }
     this.lengths = lengths;
   }
 
   getPointAtLength(length: number): PositionWithPressure {
     if (length <= 0) {
-      return this.points[0]
+      return this.points[0];
     }
 
     if (length >= this.lengths[this.lengths.length - 1]) {
-      return this.points[this.points.length - 1]
+      return this.points[this.points.length - 1];
     }
 
-    let index = this.lengths.findIndex(l=> l>=length);
+    const index = this.lengths.findIndex(l => l >= length);
 
-    let start_length = this.lengths[index - 1];
-    let end_length = this.lengths[index];
+    const start_length = this.lengths[index - 1];
+    const end_length = this.lengths[index];
 
-    let t = (length - start_length) / (end_length - start_length);
+    const t = (length - start_length) / (end_length - start_length);
 
-    return Vec.lerp(this.points[index - 1], this.points[index], t) as PositionWithPressure;
+    return Vec.lerp(
+      this.points[index - 1],
+      this.points[index],
+      t
+    ) as PositionWithPressure;
   }
 
-  getResampledPoints(step: number = 1): Array<PositionWithPressure>{
+  getResampledPoints(step = 1): Array<PositionWithPressure> {
     this.computeLengths();
-    let resampledPoints = [];
-    let totalLength = this.lengths[this.lengths.length - 1]
+    const resampledPoints = [];
+    const totalLength = this.lengths[this.lengths.length - 1];
 
     let length = 0;
     while (length <= totalLength) {
-      let point = this.getPointAtLength(length)
-      resampledPoints.push(point)
+      const point = this.getPointAtLength(length);
+      resampledPoints.push(point);
       length += step;
     }
 
-    let point = this.getPointAtLength(totalLength)
-    resampledPoints.push(point)
-    return resampledPoints
+    const point = this.getPointAtLength(totalLength);
+    resampledPoints.push(point);
+    return resampledPoints;
   }
 
   minDistanceFrom(pos: Position) {

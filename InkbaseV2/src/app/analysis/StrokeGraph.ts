@@ -196,7 +196,7 @@ class StrokeGraphLoop {
     for (let i = 1; i < this.partialStrokes.length; i++) {
       const next = this.partialStrokes[i];
       const nextPoints = next.getPoints();
-      if(next.nodes[1] == node) {
+      if (next.nodes[1] == node) {
         nextPoints.reverse();
         node = next.nodes[0];
       } else {
@@ -427,7 +427,7 @@ export default class StrokeGraph {
     return path;
   }
 
-    // getMostConnectedNode(){
+  // getMostConnectedNode(){
   //   let connectionCountForNodes = new Map();
   //   for(const node of this.nodes) {
   //     connectionCountForNodes.set(node, 0);

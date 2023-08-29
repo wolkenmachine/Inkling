@@ -29,7 +29,6 @@ export default class StrokeAnalyzer {
   squiggly = new Map<FreehandStroke, boolean>();
   arrows = new Array<any>();
 
-
   loopcount = 0;
 
   constructor(page: Page) {
@@ -37,7 +36,6 @@ export default class StrokeAnalyzer {
   }
 
   addStroke(stroke: FreehandStroke) {
-
     this.generateConnectionsForStroke(stroke);
     //this.generateLoopsForStroke(stroke);
     this.squiggly.set(stroke, computeDensity(stroke) >= 0.5);
@@ -48,8 +46,7 @@ export default class StrokeAnalyzer {
     // Generate connections for this stroke to nearby strokes on the page
 
     for (const otherStroke of this.page.freehandStrokes) {
-
-      if(stroke === otherStroke) {
+      if (stroke === otherStroke) {
         continue;
       }
 
@@ -57,7 +54,6 @@ export default class StrokeAnalyzer {
         stroke.points,
         otherStroke.points
       );
-
 
       for (const connectionZone of connectionZonesForStroke) {
         // Compute position of connection zone
@@ -78,32 +74,34 @@ export default class StrokeAnalyzer {
     // TODO: Find self intersections & closings
     this.loops = this.graph.findLoops();
     console.log(this.loops);
-
-
-
   }
 
   generateArrowLikes() {
-    let arrows = [];
-    for(const [potentialArrow, potentialArrowSquiggly] of this.squiggly) {
-      if(!potentialArrowSquiggly) {
-        let endPointStrokes = [];
-        let headPosition = potentialArrow.points[0];
-        let endPosition = potentialArrow.points[potentialArrow.points.length-1];
+    const arrows = [];
+    for (const [potentialArrow, potentialArrowSquiggly] of this.squiggly) {
+      if (!potentialArrowSquiggly) {
+        const endPointStrokes = [];
+        const headPosition = potentialArrow.points[0];
+        const endPosition =
+          potentialArrow.points[potentialArrow.points.length - 1];
 
-        for(const [potentialArrowHead, potentialArrowHeadSquiggly] of this.squiggly) {
-          if(potentialArrowHeadSquiggly) {
-            if(potentialArrowHead.minDistanceFrom(headPosition) < 10 || potentialArrowHead.minDistanceFrom(endPosition) < 10) {
-              endPointStrokes.push(potentialArrowHead)
+        for (const [potentialArrowHead, potentialArrowHeadSquiggly] of this
+          .squiggly) {
+          if (potentialArrowHeadSquiggly) {
+            if (
+              potentialArrowHead.minDistanceFrom(headPosition) < 10 ||
+              potentialArrowHead.minDistanceFrom(endPosition) < 10
+            ) {
+              endPointStrokes.push(potentialArrowHead);
             }
           }
         }
 
-        if(endPointStrokes.length > 0) {
+        if (endPointStrokes.length > 0) {
           arrows.push({
             shaft: potentialArrow,
-            endpoints: endPointStrokes
-          })
+            endpoints: endPointStrokes,
+          });
         }
       }
     }
@@ -124,28 +122,27 @@ export default class StrokeAnalyzer {
       });
     });
 
-    for(const [stroke, sq] of this.squiggly) {
-      if(sq) {
+    for (const [stroke, sq] of this.squiggly) {
+      if (sq) {
         const points = Svg.points(stroke.points);
         Svg.now('polyline', {
           points,
-          stroke: "rgba(0,255,0,0.5)",
+          stroke: 'rgba(0,255,0,0.5)',
           fill: 'none',
           'stroke-width': '5',
         });
       }
     }
 
-    for(const arrow of this.arrows) {
+    for (const arrow of this.arrows) {
       const points = Svg.points(arrow.shaft.points);
       Svg.now('polyline', {
         points,
-        stroke: "rgba(0,0,255,0.5)",
+        stroke: 'rgba(0,0,255,0.5)',
         fill: 'none',
         'stroke-width': '5',
       });
     }
-
   }
 }
 
