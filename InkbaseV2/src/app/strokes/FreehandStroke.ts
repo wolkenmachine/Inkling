@@ -10,6 +10,8 @@ export default class FreehandStroke extends Stroke {
   private selected = false;
   public group: StrokeGroup | null = null;
 
+  lengths: Array<number> = [];
+
   constructor(points: PositionWithPressure[]) {
     super(points);
     this.element = SVG.add('polyline', {
@@ -48,15 +50,64 @@ export default class FreehandStroke extends Stroke {
     return Vec.normalize(Vec.sub(b, a));
   }
 
-  distanceBetweenPoints(a: number, b: number) {
-    let dist = 0;
-    for (let i = a; i < b - 1; i++) {
+  getLength(){
+    let len = 0;
+    for (let i = 0; i < this.points.length - 1; i++) {
       const pointA = this.points[i];
       const pointB = this.points[i + 1];
-      dist += Vec.dist(pointA, pointB);
+      len += Vec.dist(pointA, pointB);
     }
 
-    return dist;
+    return len;
+  }
+
+  computeLengths() {
+    let lengths = []
+    let length_accumulator = 0
+    lengths.push(length_accumulator)
+
+    for(let i=0; i < this.points.length-1; i++) {
+      let length = Vec.dist(this.points[i + 1], this.points[i]);
+      length_accumulator += length
+      lengths.push(length_accumulator)
+    }
+    this.lengths = lengths;
+  }
+
+  getPointAtLength(length: number): PositionWithPressure {
+    if (length <= 0) {
+      return this.points[0]
+    }
+
+    if (length >= this.lengths[this.lengths.length - 1]) {
+      return this.points[this.points.length - 1]
+    }
+
+    let index = this.lengths.findIndex(l=> l>=length);
+
+    let start_length = this.lengths[index - 1];
+    let end_length = this.lengths[index];
+
+    let t = (length - start_length) / (end_length - start_length);
+
+    return Vec.lerp(this.points[index - 1], this.points[index], t) as PositionWithPressure;
+  }
+
+  getResampledPoints(step: number = 1): Array<PositionWithPressure>{
+    this.computeLengths();
+    let resampledPoints = [];
+    let totalLength = this.lengths[this.lengths.length - 1]
+
+    let length = 0;
+    while (length <= totalLength) {
+      let point = this.getPointAtLength(length)
+      resampledPoints.push(point)
+      length += step;
+    }
+
+    let point = this.getPointAtLength(totalLength)
+    resampledPoints.push(point)
+    return resampledPoints
   }
 
   minDistanceFrom(pos: Position) {

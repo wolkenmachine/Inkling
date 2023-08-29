@@ -55,7 +55,6 @@ class PartialStroke {
     }
 
     this.nodes = nodes;
-    //this.length = stroke.distanceBetweenPoints(pointIndexes[0], pointIndexes[1]);
     this.id =
       stroke.id + '_' + this.pointIndexes[0] + '_' + this.pointIndexes[1];
   }

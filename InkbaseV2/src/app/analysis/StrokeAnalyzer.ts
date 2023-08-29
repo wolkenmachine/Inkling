@@ -15,6 +15,7 @@ import Svg from '../Svg';
 
 import StrokeGraph from './StrokeGraph';
 import Polygon from '../../lib/polygon';
+import { computeDensity } from './StrokeDensity';
 
 // **
 // Stroke Analyzer: Responsible for running different analysis algorithms
@@ -25,6 +26,9 @@ export default class StrokeAnalyzer {
   graph = new StrokeGraph();
 
   loops = new Array<any>();
+  squiggly = new Map<FreehandStroke, boolean>();
+  arrows = new Array<any>();
+
 
   loopcount = 0;
 
@@ -33,10 +37,11 @@ export default class StrokeAnalyzer {
   }
 
   addStroke(stroke: FreehandStroke) {
-    console.log(stroke);
 
     this.generateConnectionsForStroke(stroke);
     //this.generateLoopsForStroke(stroke);
+    this.squiggly.set(stroke, computeDensity(stroke) >= 0.5);
+    this.generateArrowLikes();
   }
 
   generateConnectionsForStroke(stroke: FreehandStroke) {
@@ -78,7 +83,33 @@ export default class StrokeAnalyzer {
 
   }
 
-  generateArrowLikes() {}
+  generateArrowLikes() {
+    let arrows = [];
+    for(const [potentialArrow, potentialArrowSquiggly] of this.squiggly) {
+      if(!potentialArrowSquiggly) {
+        let endPointStrokes = [];
+        let headPosition = potentialArrow.points[0];
+        let endPosition = potentialArrow.points[potentialArrow.points.length-1];
+
+        for(const [potentialArrowHead, potentialArrowHeadSquiggly] of this.squiggly) {
+          if(potentialArrowHeadSquiggly) {
+            if(potentialArrowHead.minDistanceFrom(headPosition) < 10 || potentialArrowHead.minDistanceFrom(endPosition) < 10) {
+              endPointStrokes.push(potentialArrowHead)
+            }
+          }
+        }
+
+        if(endPointStrokes.length > 0) {
+          arrows.push({
+            shaft: potentialArrow,
+            endpoints: endPointStrokes
+          })
+        }
+      }
+    }
+
+    this.arrows = arrows;
+  }
 
   render() {
     this.graph.render();
@@ -92,6 +123,28 @@ export default class StrokeAnalyzer {
         'stroke-width': '5',
       });
     });
+
+    for(const [stroke, sq] of this.squiggly) {
+      if(sq) {
+        const points = Svg.points(stroke.points);
+        Svg.now('polyline', {
+          points,
+          stroke: "rgba(0,255,0,0.5)",
+          fill: 'none',
+          'stroke-width': '5',
+        });
+      }
+    }
+
+    for(const arrow of this.arrows) {
+      const points = Svg.points(arrow.shaft.points);
+      Svg.now('polyline', {
+        points,
+        stroke: "rgba(0,0,255,0.5)",
+        fill: 'none',
+        'stroke-width': '5',
+      });
+    }
 
   }
 }
@@ -113,7 +166,7 @@ function findConnectionZonesBetweenStrokes(
   for (let i = 0; i < strokeA.length; i++) {
     const closest = findClosestPointOnStroke(strokeB, strokeA[i]);
 
-    if (closest.dist < 10) {
+    if (closest.dist < 20) {
       if (!currentConnection) {
         currentConnection = {
           start: [i, closest.index],
