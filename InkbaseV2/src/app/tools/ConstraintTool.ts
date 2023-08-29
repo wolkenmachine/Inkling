@@ -6,18 +6,19 @@ import FreehandStroke from '../strokes/FreehandStroke';
 import StrokeGroup from '../strokes/StrokeGroup';
 import Tool from './Tool';
 import SVG from '../Svg';
-
-interface ConstraintCandidate {
-  type: 'horizontal' | 'vertical' | 'length' | 'angle';
-  strokeGroup: StrokeGroup;
-  refStrokeGroup: StrokeGroup | null;
-}
+import { toDegrees } from '../../lib/helpers';
 
 interface Options {
   vertical: boolean;
   horizontal: boolean;
   length: boolean;
   angle: boolean;
+}
+
+interface ConstraintCandidate {
+  type: 'horizontal' | 'vertical' | 'length' | 'angle';
+  strokeGroup: StrokeGroup;
+  refStrokeGroup: StrokeGroup | null;
 }
 
 type LastTapInfo = {
@@ -91,8 +92,7 @@ export default class ConstraintTool extends Tool {
   private addConstraintCandidates(strokeGroup: StrokeGroup) {
     // add constraints based on this stroke group alone
 
-    const a = strokeGroup.a;
-    const b = strokeGroup.b;
+    const { a, b } = strokeGroup;
 
     const vertical =
       this.options.vertical && Math.abs(a.position.x - b.position.x) < 5;
@@ -112,8 +112,7 @@ export default class ConstraintTool extends Tool {
 
     // add constraints relative to the reference stroke group
 
-    const ra = this.refStrokeGroup.a;
-    const rb = this.refStrokeGroup.b;
+    const { a: ra, b: rb } = this.refStrokeGroup;
 
     const refLen = Vec.dist(ra.position, rb.position);
     const len = Vec.dist(a.position, b.position);
@@ -124,14 +123,11 @@ export default class ConstraintTool extends Tool {
     }
 
     if (this.options.angle && !vertical && !horizontal) {
-      const angle =
-        constraints.computeAngle(
-          a.position,
-          b.position,
-          ra.position,
-          rb.position
-        ) ?? 0;
-      if ((((angle + 2 * Math.PI) % (Math.PI / 2)) * 180) / Math.PI < 5) {
+      const angle = toDegrees(
+        Vec.angle(Vec.sub(rb.position, ra.position)) -
+          Vec.angle(Vec.sub(b.position, a.position))
+      );
+      if (Math.abs(angle - nearestMultiple(angle, 90)) < 1) {
         this.addConstraintCandidate('angle', strokeGroup);
       }
     }
@@ -161,8 +157,7 @@ export default class ConstraintTool extends Tool {
     super.render();
 
     for (const { type, strokeGroup } of this.constraintCandidates) {
-      const a = strokeGroup.a;
-      const b = strokeGroup.b;
+      const { a, b } = strokeGroup;
       switch (type) {
         case 'vertical':
           SVG.now('polyline', {
@@ -237,14 +232,22 @@ export default class ConstraintTool extends Tool {
           constraints.horizontal(a, b);
           break;
         case 'length': {
-          const refLenVar = constraints.length(ra!, rb!).length;
-          const newLenVar = constraints.length(a, b).length;
+          const refLenVar = constraints.length(ra!, rb!).variables[0];
+          const newLenVar = constraints.length(a, b).variables[0];
           constraints.variableEquals(refLenVar, newLenVar);
           break;
         }
         case 'angle': {
-          const angleVar = constraints.angle(a, b, ra!, rb!).angle;
-          constraints.fixedValue(angleVar);
+          const refAngleVar = constraints.angle(ra!, rb!).variables[0];
+          const angleVar = constraints.angle(a, b).variables[0];
+          const diffVar = constraints.variablePlus(
+            refAngleVar,
+            angleVar,
+            constraints.variable(
+              nearestMultiple(refAngleVar.value - angleVar.value, Math.PI / 2)
+            )
+          ).variables[2];
+          constraints.fixedValue(diffVar);
           break;
         }
       }
@@ -252,4 +255,8 @@ export default class ConstraintTool extends Tool {
     }
     this.constraintCandidates.clear();
   }
+}
+
+function nearestMultiple(n: number, m: number) {
+  return Math.round(n / m) * m;
 }
