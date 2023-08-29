@@ -7,7 +7,7 @@ import Stroke from './strokes/Stroke';
 import StrokeClusters from './StrokeClusters';
 import { Position, PositionWithPressure } from '../lib/types';
 import Handle from './strokes/Handle';
-import StrokeAnalyzer from './StrokeAnalyzer';
+import StrokeAnalyzer from './analysis/StrokeAnalyzer';
 import { makeIterableIterator } from '../lib/helpers';
 
 interface Options {
@@ -61,7 +61,7 @@ export default class Page {
     return stroke;
   }
 
-  onstrokeUpdated(stroke: Stroke) {
+  onStrokeEnded(stroke: Stroke) {
     if (stroke instanceof FreehandStroke) {
       this.analyzer?.addStroke(stroke);
     }

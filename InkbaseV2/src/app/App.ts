@@ -31,7 +31,7 @@ const toolPicker = new ToolPicker([
     vertical: true,
     horizontal: true,
     length: true,
-    angle: false,
+    angle: true,
   }),
 ]);
 

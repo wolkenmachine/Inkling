@@ -158,6 +158,9 @@ Vec.rotate90CW = (v: Vector) => Vec(v.y, -v.x);
 // 90 degrees counter clockwise
 Vec.rotate90CCW = (v: Vector) => Vec(-v.y, v.x);
 
+// 180 flip
+Vec.flip = (v: Vector) => Vec(-v.x, -v.y);
+
 // TODO(marcel): right now this module is inconsistent in the way it expects angles to work.
 // e.g., this function takes an angle in radians, whereas angleBetween uses degrees.
 // (this will help avoid confusion...)

@@ -22,6 +22,7 @@
     "typescript": "~5.1.6"
   },
   "dependencies": {
+    "@doodle3d/clipper-js": "^1.0.11",
     "@types/numeric": "^1.2.3",
     "numeric": "^1.2.6",
     "perfect-freehand": "^1.2.0"
