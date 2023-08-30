@@ -213,6 +213,10 @@ class StrokeGraphLoop {
     const pts = this.getPolygonPoints();
     return Polygon.area(pts);
   }
+
+  hasStroke(stroke: FreehandStroke){
+    return this.partialStrokes.find(ps=>ps.stroke === stroke) !== undefined;
+  }
 }
 
 export default class StrokeGraph {
@@ -384,49 +388,6 @@ export default class StrokeGraph {
     path.pop();
     return undefined;
   }
-
-  findMaximallyClockwiseTurningLoopForNode(startNode: StrokeGraphNode) {
-    interface StackEntry {
-      node: StrokeGraphNode;
-      direction: Vector | null;
-    }
-
-    const stack = [{ node: startNode, direction: Vec(1, 0) }];
-    const path = [];
-    const targetNode = startNode;
-    const visitedEdgeIds = new Set<string>();
-
-    while (stack.length > 0) {
-      const { node, direction } = stack.pop()!; //"!" To make typescript happy. Can't be undefined, because stack.length > 0
-      path.push(node);
-      if (node == targetNode) {
-        return path;
-      }
-
-      const partialStrokes = this.getAdjacentPartialStrokes(node);
-      let potentialNextSteps = [];
-
-      for (const ps of partialStrokes) {
-        if (!visitedEdgeIds.has(ps.id)) {
-          visitedEdgeIds.add(ps.id);
-          const direction = ps.getDirection();
-          const nextNode = ps.nodes[1];
-          potentialNextSteps.push({ node: nextNode, direction });
-        }
-      }
-
-      potentialNextSteps = potentialNextSteps.sort((a, b) => {
-        return (
-          Vec.cross(direction, a.direction) - Vec.cross(direction, b.direction)
-        );
-      });
-      stack.push(...potentialNextSteps);
-
-      path.pop();
-    }
-    return path;
-  }
-
   // getMostConnectedNode(){
   //   let connectionCountForNodes = new Map();
   //   for(const node of this.nodes) {

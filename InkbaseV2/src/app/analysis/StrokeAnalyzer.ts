@@ -36,10 +36,12 @@ export default class StrokeAnalyzer {
   }
 
   addStroke(stroke: FreehandStroke) {
+    this.squiggly.set(stroke, computeDensity(stroke) >= 0.5);
     this.generateConnectionsForStroke(stroke);
     //this.generateLoopsForStroke(stroke);
-    this.squiggly.set(stroke, computeDensity(stroke) >= 0.5);
-    this.generateArrowLikes();
+    //this.generateArrowLikes();
+
+
   }
 
   generateConnectionsForStroke(stroke: FreehandStroke) {
@@ -72,7 +74,9 @@ export default class StrokeAnalyzer {
     }
 
     // TODO: Find self intersections & closings
+
     this.loops = this.graph.findLoops();
+    
     console.log(this.loops);
   }
 
@@ -107,6 +111,11 @@ export default class StrokeAnalyzer {
     }
 
     this.arrows = arrows;
+  }
+
+  getPotentialClustersForStroke(stroke: FreehandStroke){
+    let loops = this.loops.filter(l=>l.hasStroke(stroke));
+    
   }
 
   render() {
